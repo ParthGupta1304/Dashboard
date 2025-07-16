@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   leave_end: String,
   signup_date: String,
   signup_time: String,
+  admin_approval: {type: Boolean, default: false},
   leave_history: [
     {
       reason: String,

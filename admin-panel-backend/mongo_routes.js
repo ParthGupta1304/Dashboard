@@ -81,9 +81,8 @@ app.post("/api/auth/login", async (req, res) => {
     user.last_login_time = login_time;
     await user.save();
 
-    res
-      .status(200)
-      .json({ message: "Login successful", user, role: user.role });
+    res;
+    status(200).json({ message: "Login successful", user, role: user.role });
   } catch (error) {
     console.error("Error logging in:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -113,16 +112,22 @@ app.delete("/api/auth/admin/:ID", async (req, res) => {
 });
 app.get("/api/auth/employee/:ID", async (req, res) => {
   const { ID } = req.params;
-  // console.log(ID);
-
-  // res.send(ID);
-  // console.log(ID);
-
   try {
     const employee = await userModel.findOne({ ID: Number(ID) });
     if (!employee)
       return res.status(404).json({ message: "Employee not found" });
-    console.log("Employee fetched:", employee);
+    // Reset leave fields in DB if leave end date has passed
+    if (employee.leave_end) {
+      const today = new Date();
+      const endDate = new Date(employee.leave_end);
+      if (today > endDate) {
+        employee.asked_leave_status = false;
+        employee.asked_leave_reason = "";
+        employee.leave_start = "";
+        employee.leave_end = "";
+        await employee.save();
+      }
+    }
     res.send(employee);
   } catch (error) {
     console.error("Error fetching employee:", error);
@@ -130,31 +135,32 @@ app.get("/api/auth/employee/:ID", async (req, res) => {
   }
 });
 
-app.get("/api/auth/employee/:ID/ask-leave", async (req, res) => {
-  const { ID } = req.params;
-  try {
-    const employee = await userModel.findOne({ ID: Number(ID) });
-    if (!employee)
-      return res.status(404).json({ message: "Employee not found" });
-    console.log("Employee fetched:", employee);
-    if (employee.asked_leave_status) {
-      return res.status(400).json({ message: "Leave already requested" });
-    } else {
-      employee.asked_leave_status = true;
-      employee.leaveAskedCount += 1;
-      // employee.asked_leave_reason = "Leave requested by employee";
-      await employee.save();
-      res.status(200).json({ message: "Leave requested successfully" });
-    }
-  } catch (error) {
-    console.error("Error fetching employee:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+// app.get("/api/auth/employee/:ID/ask-leave", async (req, res) => {
+//   const { ID } = req.params;
+//   try {
+//     const employee = await userModel.findOne({ ID: Number(ID) });
+//     if (!employee)
+//       return res.status(404).json({ message: "Employee not found" });
+//     console.log("Employee fetched:", employee);
+//     if (employee.asked_leave_status) {
+//       return res.status(400).json({ message: "Leave already requested" });
+//     } else {
+//       employee.asked_leave_status = true;
+//       employee.leaveAskedCount += 1;
+//       // employee.asked_leave_reason = "Leave requested by employee";
+//       await employee.save();
+//       res.status(200).json({ message: "Leave requested successfully" });
+//     }
+//   } catch (error) {
+//     console.error("Error fetching employee:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// });
 
 app.patch("/api/auth/employee/:ID/ask-leave", async (req, res) => {
   const { ID } = req.params;
-  const { asked_leave_reason, leave_start, leave_end } = req.body;
+  const { asked_leave_reason, leave_start, leave_end, admin_approval } =
+    req.body;
   try {
     const employee = await userModel.findOne({ ID: Number(ID) });
     if (!employee)
@@ -167,12 +173,15 @@ app.patch("/api/auth/employee/:ID/ask-leave", async (req, res) => {
     employee.asked_leave_reason = asked_leave_reason;
     employee.leave_start = leave_start;
     employee.leave_end = leave_end;
+    employee.admin_approval = true; // Set admin approval status
+    // console.log(admin_approval);
     // Add to leave_history
     employee.leave_history.push({
       reason: asked_leave_reason,
       start: leave_start,
       end: leave_end,
       ID: employee.ID,
+      admin_approval: true,
     });
     await employee.save();
     res.status(200).json({ message: "Leave requested successfully" });
@@ -197,10 +206,7 @@ app.patch("/api/auth/admin/:ID/grant-leave", async (req, res) => {
       employee.leaves_granted = (employee.leaves_granted || 0) + 1;
     }
     // Reset leave request fields
-    employee.asked_leave_status = false;
-    employee.asked_leave_reason = "";
-    employee.leave_start = "";
-    employee.leave_end = "";
+    employee.admin_approval = false;
     await employee.save();
     res.status(200).json({ message: `Leave ${action}ed successfully` });
   } catch (error) {

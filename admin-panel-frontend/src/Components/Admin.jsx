@@ -41,7 +41,7 @@ const Admin = ({ adminId }) => {
 
   // Show popup with employees who have requested leave
   const handleGrantLeave = () => {
-    const requests = employees.filter((e) => e.asked_leave_status);
+    const requests = employees.filter((e) => e.admin_approval);
     setLeaveRequests(requests);
     setShowLeavePopup(true);
   };
@@ -61,6 +61,8 @@ const Admin = ({ adminId }) => {
       alert(`Leave ${action}ed successfully!`);
       setShowLeavePopup(false);
       setSelectedEmployee(null);
+      // Reset admin approval status
+
       // Refresh employees list
       const res = await axios.get("http://localhost:3000/api/auth/admin");
       setEmployees(res.data);
@@ -70,7 +72,9 @@ const Admin = ({ adminId }) => {
   };
 
   // Calculate pending leave requests
-  const pendingLeaves = employees.filter((e) => e.asked_leave_status).length;
+  const pendingLeaves = employees.filter(
+    (e) => e.admin_approval === true
+  ).length;
 
   // Render the admin panel UI
   return (

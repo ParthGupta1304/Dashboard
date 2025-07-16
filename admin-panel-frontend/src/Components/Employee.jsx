@@ -31,6 +31,7 @@ const Employee = () => {
           asked_leave_reason: leaveReason,
           leave_start: leaveStart,
           leave_end: leaveEnd,
+          admin_approval: true, // Assuming admin approval is required
         }
       );
       alert("Leave requested!");
@@ -50,8 +51,14 @@ const Employee = () => {
     if (user.leaves_granted > 0 && user.leave_end) {
       const today = new Date();
       const endDate = new Date(user.leave_end);
-      return today <= endDate;
+      if (today <= endDate) {
+        return true;
+      }
     }
+    user.asked_leave_status === false;
+    user.asked_leave_reason = "";
+    user.leave_start = "";
+    user.leave_end = "";
     return false;
   };
 
@@ -92,10 +99,10 @@ const Employee = () => {
               : "bg-blue-600 hover:bg-blue-800"
           }`}
         >
-          {user.asked_leave_status
-            ? "Leave Requested"
-            : isLeaveActive()
+          {user.asked_leave_status && isLeaveActive() && !user.admin_approval
             ? "Granted"
+            : isLeaveActive() && user.admin_approval
+            ? "Pending"
             : "Ask for Leave"}
         </button>
         {showModal && (
@@ -163,11 +170,13 @@ const Employee = () => {
               Leave Status
             </td>
             <td className="py-2">
-              {user.asked_leave_status === true
-                ? "Pending"
-                : isLeaveActive()
+              {user.asked_leave_status &&
+              isLeaveActive() &&
+              !user.admin_approval
                 ? "Granted"
-                : "Not Requested"}
+                : isLeaveActive() && user.admin_approval
+                ? "Pending"
+                : "-"}
             </td>
           </tr>
           <tr>
