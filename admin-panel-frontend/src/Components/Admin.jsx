@@ -1,14 +1,20 @@
 // Admin panel component for managing employees
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
-const Admin = ({ adminId }) => {
+const Admin = () => {
   // State for employee list and admin name
   const [employees, setEmployees] = useState([]);
   const [adminName, setAdminName] = useState("");
   const [showLeavePopup, setShowLeavePopup] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const { adminID } = useParams();
+  console.log(
+    "Admin ID from params:", adminID
+  );
+  
 
   // Fetch all employees on mount
   useEffect(() => {
@@ -22,14 +28,28 @@ const Admin = ({ adminId }) => {
   }, []);
 
   // Fetch admin name by ID on mount or when adminId changes
+  // useEffect(() => {
+  //   if (adminId) {
+  //     axios
+  //       .get(`http://localhost:3000/api/auth/admin/${Id}`)
+  //       .then((res) => setAdminName(res.data.username))
+  //       .catch(() => setAdminName("Admin"));
+  //   }
+  // }, [adminId]);
   useEffect(() => {
-    if (adminId) {
-      axios
-        .get(`http://localhost:3000/api/auth/admin/${Id}`)
-        .then((res) => setAdminName(res.data.username))
-        .catch(() => setAdminName("Admin"));
+    // Fetch admin name by ID
+    if (!adminID) {
+      console.warn("No ID found. Redirect or show error.");
+      return;
     }
-  }, [adminId]);
+    axios
+      .get(`http://localhost:3000/api/auth/admin/${adminID}`)
+      .then((res) => {
+        setAdminName(res.data.username);
+        console.log("Admin data:", res.data);
+      })
+      .catch(() => setAdminName("Admin"));
+  }, [adminID]);
 
   // Remove an employee by ID
   const handleRemove = (ID) => {
@@ -81,7 +101,7 @@ const Admin = ({ adminId }) => {
     <div className="w-full h-screen flex flex-col bg-gradient-to-br from-zinc-950 via-slate-950 to-gray-950 ">
       <div className="flex justify-between gap-10 border-b-2 border-gray-700">
         <h1 className=" text-white text-6xl font-semibold mb-5 mr-5 mt-8  font-[FoundersGrotesk] ml-8 bg-gradient-to-r from-slate-400 via-zinc-300 to-gray-100 bg-clip-text ">
-          Welcome Admin {adminName}
+          Welcome {adminName}
         </h1>
         <button
           onClick={handleGrantLeave}

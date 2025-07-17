@@ -71,6 +71,8 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     // Check if user exists
     const user = await userModel.findOne({ username, password, ID });
+    console.log(user);
+
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
@@ -80,9 +82,11 @@ app.post("/api/auth/login", async (req, res) => {
     user.last_Login_date = login_date;
     user.last_login_time = login_time;
     await user.save();
+    console.log(user);
 
-    res;
-    status(200).json({ message: "Login successful", user, role: user.role });
+    res
+      .status(200)
+      .json({ message: "Login successful", user, role: user.role });
   } catch (error) {
     console.error("Error logging in:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -134,28 +138,6 @@ app.get("/api/auth/employee/:ID", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-// app.get("/api/auth/employee/:ID/ask-leave", async (req, res) => {
-//   const { ID } = req.params;
-//   try {
-//     const employee = await userModel.findOne({ ID: Number(ID) });
-//     if (!employee)
-//       return res.status(404).json({ message: "Employee not found" });
-//     console.log("Employee fetched:", employee);
-//     if (employee.asked_leave_status) {
-//       return res.status(400).json({ message: "Leave already requested" });
-//     } else {
-//       employee.asked_leave_status = true;
-//       employee.leaveAskedCount += 1;
-//       // employee.asked_leave_reason = "Leave requested by employee";
-//       await employee.save();
-//       res.status(200).json({ message: "Leave requested successfully" });
-//     }
-//   } catch (error) {
-//     console.error("Error fetching employee:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// });
 
 app.patch("/api/auth/employee/:ID/ask-leave", async (req, res) => {
   const { ID } = req.params;
@@ -211,6 +193,21 @@ app.patch("/api/auth/admin/:ID/grant-leave", async (req, res) => {
     res.status(200).json({ message: `Leave ${action}ed successfully` });
   } catch (error) {
     console.error("Error updating leave status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.get("/api/auth/admin/:ID", async (req, res) => {
+  const { ID } = req.params;
+  console.log("Hello");
+  
+  try {
+    const admin = await userModel.findOne({ ID: Number(ID), role: "admin" });
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
+    console.log("Admin fetched:", admin);
+    res.send(admin);
+  } catch (error) {
+    console.error("Error fetching admin:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

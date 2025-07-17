@@ -1,4 +1,3 @@
-
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -12,10 +11,10 @@ import "./index.css";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Home />} /> 
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
-      <Route path="/admin/:ID" element={<Admin />} />
+      <Route path="/admin/:adminID" element={<Admin />} />
       <Route path="/employee/:ID" element={<Employee />} />
     </Routes>
   </BrowserRouter>
