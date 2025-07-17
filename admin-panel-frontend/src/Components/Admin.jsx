@@ -10,11 +10,9 @@ const Admin = () => {
   const [showLeavePopup, setShowLeavePopup] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [leave_history, setLeave_history] = useState(null);
   const { adminID } = useParams();
-  console.log(
-    "Admin ID from params:", adminID
-  );
-  
+  console.log("Admin ID from params:", adminID);
 
   // Fetch all employees on mount
   useEffect(() => {
@@ -221,7 +219,7 @@ const Admin = () => {
       {/* Employee Leave Details Popup */}
       {selectedEmployee && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 p-8 rounded-xl shadow-lg w-full max-w-md">
+          <div className="bg-zinc-900 p-8 rounded-xl shadow-lg w-full max-w-lg">
             <h3 className="text-xl text-white mb-2">
               Leave Details for {selectedEmployee.username}
             </h3>
@@ -234,9 +232,9 @@ const Admin = () => {
             <p className="text-gray-300 mb-2">
               End Date: {selectedEmployee.leave_end || "-"}
             </p>
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-6 justify-center mt-9">
               <button
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700"
                 onClick={() => handleLeaveAction(selectedEmployee.ID, "accept")}
               >
                 Accept
@@ -248,12 +246,58 @@ const Admin = () => {
                 Reject
               </button>
               <button
+                className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={() => setLeave_history(selectedEmployee.leave_history)}
+              >
+                View History
+              </button>
+              <button
                 className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800"
                 onClick={() => setSelectedEmployee(null)}
               >
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Leave History Popup */}
+      {leave_history && (
+        <div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 p-8 rounded-xl shadow-lg w-full max-w-lg">
+            <h3 className="text-2xl font-semi-bold text-white mb-2">
+              Leave History for {selectedEmployee.username}
+            </h3>
+            <ul>
+              {leave_history.length === 0 ? (
+                <li className="text-gray-300 text-2xl">
+                  No leave history available.
+                </li>
+              ) : (
+                leave_history.map((req, idx) => (
+                  <li key={idx} className="mb-2">
+                    <p className="text-gray-300 text-lg">
+                      Leave Start : {req.start || "-"}
+                    </p>
+                    <p className="text-gray-300 text-lg">
+                      Leave End : {req.end || "-"}
+                    </p>
+                    <p className="text-gray-300 text-lg">
+                      Reason : {req.reason || req.asked_leave_reason || "-"}
+                    </p>
+                    <p className="text-gray-300 text-lg">
+                      Status : {req.Status || "-"}
+                    </p>
+                  </li>
+                ))
+              )}
+            </ul>
+            <button
+              className="mt-4 px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800"
+              onClick={() => setLeave_history(null)}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

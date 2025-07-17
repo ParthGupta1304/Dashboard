@@ -22,6 +22,16 @@ const Employee = () => {
       })
       .catch((err) => console.error("Error fetching employee:", err));
   }, [ID]);
+  const check_status = () => {
+    if (Array.isArray(user.leave_history) && user.leave_history.length > 0) {
+      const lastStatus =
+        user.leave_history[user.leave_history.length - 1].Status;
+      if (lastStatus === "Accepted") return "Accepted";
+      if (lastStatus === "Rejected") return "Ask Again";
+      return "Pending";
+    }
+    return "Request Leave";
+  };
 
   const handleAskLeave = async () => {
     try {
@@ -91,19 +101,17 @@ const Employee = () => {
       </h2>
       <div className="flex flex-col items-center mt-8">
         <button
-          disabled={user.asked_leave_status || isLeaveActive()}
+          disabled={
+            check_status() === "Pending" || check_status() === "Accepted"
+          }
           onClick={() => setShowModal(true)}
           className={`mb-6 px-6 py-2 rounded font-bold transition ${
-            user.asked_leave_status || isLeaveActive()
+            check_status() === "Pending" || check_status() === "Accepted"
               ? "bg-gray-600 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-800"
           }`}
         >
-          {user.asked_leave_status && isLeaveActive() && !user.admin_approval
-            ? "Granted"
-            : isLeaveActive() && user.admin_approval
-            ? "Pending"
-            : "Ask for Leave"}
+          {check_status()}
         </button>
         {showModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

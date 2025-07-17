@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema({
       start: String,
       end: String,
       ID: Number,
+      Status: String,
     },
   ],
 });

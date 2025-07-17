@@ -84,9 +84,8 @@ app.post("/api/auth/login", async (req, res) => {
     await user.save();
     console.log(user);
 
-    res
-      .status(200)
-      .json({ message: "Login successful", user, role: user.role });
+    res;
+    status(200).json({ message: "Login successful", user, role: user.role });
   } catch (error) {
     console.error("Error logging in:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -186,11 +185,16 @@ app.patch("/api/auth/admin/:ID/grant-leave", async (req, res) => {
     }
     if (action === "accept") {
       employee.leaves_granted = (employee.leaves_granted || 0) + 1;
+      employee.leave_history[employee.leave_history.length - 1].Status =
+        "Accepted";
+    } else if (action === "reject") {
+      employee.leave_history[employee.leave_history.length - 1].Status =
+        "Rejected";
     }
     // Reset leave request fields
     employee.admin_approval = false;
     await employee.save();
-    res.status(200).json({ message: `Leave ${action}ed successfully` });
+    res.status(200).json({ message: `Leave ${action}ed ` });
   } catch (error) {
     console.error("Error updating leave status:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -200,7 +204,7 @@ app.patch("/api/auth/admin/:ID/grant-leave", async (req, res) => {
 app.get("/api/auth/admin/:ID", async (req, res) => {
   const { ID } = req.params;
   console.log("Hello");
-  
+
   try {
     const admin = await userModel.findOne({ ID: Number(ID), role: "admin" });
     if (!admin) return res.status(404).json({ message: "Admin not found" });
