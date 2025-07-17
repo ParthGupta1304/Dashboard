@@ -72,7 +72,7 @@ This is my personal portfolio project. I will be push changes on regular basis.
 
 📞 Contact
 Parth Gupta – parthg1304@gmail.com
-Linkedn - linkedin.com/in/parth-gupta-0a4076266
+LinkedIn - linkedin.com/in/parth-gupta-0a4076266
 Git Hub - https://github.com/ParthGupta1304
 
 
