@@ -25,15 +25,6 @@ const Admin = () => {
       .catch((err) => console.error("Error fetching employees:", err));
   }, []);
 
-  // Fetch admin name by ID on mount or when adminId changes
-  // useEffect(() => {
-  //   if (adminId) {
-  //     axios
-  //       .get(`http://localhost:3000/api/auth/admin/${Id}`)
-  //       .then((res) => setAdminName(res.data.username))
-  //       .catch(() => setAdminName("Admin"));
-  //   }
-  // }, [adminId]);
   useEffect(() => {
     // Fetch admin name by ID
     if (!adminID) {
@@ -98,7 +89,7 @@ const Admin = () => {
   return (
     <div className="w-full h-screen flex flex-col bg-gradient-to-br from-zinc-950 via-slate-950 to-gray-950 ">
       <div className="flex justify-between gap-10 border-b-2 border-gray-700">
-        <h1 className=" text-white text-6xl font-semibold mb-5 mr-5 mt-8  font-[FoundersGrotesk] ml-8 bg-gradient-to-r from-slate-400 via-zinc-300 to-gray-100 bg-clip-text ">
+        <h1 className=" text-white text-6xl font-semibold mb-5 mr-5 mt-8  ml-8 bg-gradient-to-r from-slate-400 via-zinc-300 to-gray-100 bg-clip-text ">
           Welcome {adminName}
         </h1>
         <button
@@ -144,7 +135,11 @@ const Admin = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-700">
                   {employees.map((emp, idx) => (
-                    <tr key={emp.ID} className="hover:bg-zinc-700 transition">
+                    <tr
+                      key={emp.ID}
+                      className="hover:bg-zinc-700 transition cursor-pointer"
+                      onClick={() => setLeave_history(emp.leave_history)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-center text-gray-200">
                         {idx + 1}
                       </td>
@@ -162,7 +157,10 @@ const Admin = () => {
                       </td>
                       <td className="text-center">
                         <button
-                          onClick={() => handleRemove(emp.ID)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemove(emp.ID);
+                          }}
                           className="text-red-500  hover:text-red-700"
                         >
                           Remove
@@ -266,7 +264,7 @@ const Admin = () => {
         <div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
           <div className="bg-zinc-900 p-8 rounded-xl shadow-lg w-full max-w-lg">
             <h3 className="text-2xl font-semi-bold text-white mb-2">
-              Leave History for {selectedEmployee.username}
+              Leave History
             </h3>
             <ul>
               {leave_history.length === 0 ? (
