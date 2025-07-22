@@ -217,6 +217,52 @@ app.get("/api/auth/admin/:ID", async (req, res) => {
   }
 });
 
+// Get all leave history for all employees between two dates
+app.post("/api/auth/leave-history-range", async (req, res) => {
+  const { start, end } = req.body;
+  if (!start || !end) {
+    return res
+      .status(400)
+      .json({ message: "Start and end dates are required" });
+  }
+  try {
+    const employees = await userModel.find({});
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    let results = [];
+    employees.forEach((emp) => {
+      if (Array.isArray(emp.leave_history)) {
+        emp.leave_history.forEach((entry) => {
+          if (entry.start && entry.end) {
+            const entryStart = new Date(entry.start);
+            const entryEnd = new Date(entry.end);
+            // Check if leave overlaps with the range
+            if (
+              entryStart >= startDate &&
+              entryStart <= endDate &&
+              entryEnd >= startDate &&
+              entryEnd <= endDate
+            ) {
+              results.push({
+                employee: emp.username,
+                ID: emp.ID,
+                reason: entry.reason || entry.asked_leave_reason,
+                start: entry.start || entry.leave_start,
+                end: entry.end || entry.leave_end,
+                Status: entry.Status || entry.status || "-",
+              });
+            }
+          }
+        });
+      }
+    });
+    res.json({ history: results });
+  } catch (error) {
+    console.error("Error fetching leave history by range:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.listen(3000, () => {
   console.log("MongoDB API is running on http://localhost:3000");
 });

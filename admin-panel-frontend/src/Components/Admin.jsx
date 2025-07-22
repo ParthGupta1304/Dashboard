@@ -11,6 +11,10 @@ const Admin = () => {
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [leave_history, setLeave_history] = useState(null);
+  const [showHistoryPopup, setShowHistoryPopup] = useState(false);
+  const [historyStart, setHistoryStart] = useState("");
+  const [historyEnd, setHistoryEnd] = useState("");
+  const [historyResults, setHistoryResults] = useState([]);
   const { adminID } = useParams();
   console.log("Admin ID from params:", adminID);
 
@@ -85,6 +89,25 @@ const Admin = () => {
     (e) => e.admin_approval === true
   ).length;
 
+  // Fetch leave history by date range
+  const fetchLeaveHistory = async () => {
+    if (!historyStart || !historyEnd) return;
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/leave-history-range",
+        {
+          start: historyStart,
+          end: historyEnd,
+        }
+      );
+      setHistoryResults(res.data.history);
+      console.log("Leave history results:", res.data.history);
+    } catch (err) {
+      alert("Error fetching leave history");
+      console.log("Error fetching leave history:", err);
+    }
+  };
+
   // Render the admin panel UI
   return (
     <div className="w-full h-screen flex flex-col bg-gradient-to-br from-zinc-950 via-slate-950 to-gray-950 ">
@@ -92,17 +115,25 @@ const Admin = () => {
         <h1 className=" text-white text-6xl font-semibold mb-5 mr-5 mt-8  ml-8 bg-gradient-to-r from-slate-400 via-zinc-300 to-gray-100 bg-clip-text ">
           Welcome {adminName}
         </h1>
-        <button
-          onClick={handleGrantLeave}
-          className="relative border-2 border-white rounded-lg text-2xl mt-8 mb-5 mr-12 p-3 text-white font-semibold hover:bg-slate-700 bg-blue-700 transition"
-        >
-          Leaves
-          {pendingLeaves > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full px-2 py-1 text-xs font-bold animate-bounce">
-              {pendingLeaves}
-            </span>
-          )}
-        </button>
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={handleGrantLeave}
+            className="relative border-2 border-white rounded-lg text-2xl mt-8 mb-5 mr-2 p-3 text-white font-semibold hover:bg-slate-700 bg-blue-700 transition"
+          >
+            Leaves
+            {pendingLeaves > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full px-2 py-1 text-xs font-bold animate-bounce">
+                {pendingLeaves}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setShowHistoryPopup(true)}
+            className="border-2 border-white rounded-lg text-2xl mt-8 mb-5 mr-12 p-3 text-white font-semibold hover:bg-slate-700 bg-green-700 transition"
+          >
+            Leave History Search
+          </button>
+        </div>
       </div>
       <div>
         <div className="w-full rounded-xl  p-8 mt-0">
@@ -296,6 +327,96 @@ const Admin = () => {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+      {/* Leave History Search Popup */}
+      {showHistoryPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 p-8 rounded-xl shadow-lg w-full max-w-2xl">
+            <h2 className="text-2xl text-white mb-4">Search Leave History</h2>
+            <div className="flex gap-4 mb-4">
+              <div>
+                <label className="text-gray-300">Start Date: </label>
+                <input
+                  type="date"
+                  value={historyStart}
+                  onChange={(e) => setHistoryStart(e.target.value)}
+                  className="rounded p-2 bg-zinc-800 text-white"
+                />
+              </div>
+              <div>
+                <label className="text-gray-300">End Date: </label>
+                <input
+                  type="date"
+                  value={historyEnd}
+                  onChange={(e) => setHistoryEnd(e.target.value)}
+                  className="rounded p-2 bg-zinc-800 text-white"
+                />
+              </div>
+              <button
+                className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={fetchLeaveHistory}
+              >
+                Search
+              </button>
+              <button
+                className="ml-2 px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800"
+                onClick={() => {
+                  setShowHistoryPopup(false);
+                  setHistoryResults([]);
+                }}
+              >
+                Close
+              </button>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              {historyResults.length === 0 ? (
+                <p className="text-gray-300">
+                  No leave history found for this range.
+                </p>
+              ) : (
+                <table className="w-full text-white border border-gray-700 mt-4">
+                  <thead>
+                    <tr>
+                      <th className="border px-2 py-1">Employee</th>
+                      <th className="border px-2 py-1">ID</th>
+                      <th className="border px-2 py-1">Reason</th>
+                      <th className="border px-2 py-1">Start</th>
+                      <th className="border px-2 py-1">End</th>
+                      <th className="border px-2 py-1">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyResults.map((entry, idx) => {
+                      console.log("History entry:", entry);
+                      return (
+                        <tr key={idx}>
+                          <td className="border px-2 py-1">
+                            {entry.employee || "-"}
+                          </td>
+                          <td className="border px-2 py-1">
+                            {entry.ID || "-"}
+                          </td>
+                          <td className="border px-2 py-1">
+                            {entry.reason || entry.asked_leave_reason || "-"}
+                          </td>
+                          <td className="border px-2 py-1">
+                            {entry.start || entry.leave_start || "-"}
+                          </td>
+                          <td className="border px-2 py-1">
+                            {entry.end || entry.leave_end || "-"}
+                          </td>
+                          <td className="border px-2 py-1">
+                            {entry.Status || entry.status || "-"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         </div>
       )}
