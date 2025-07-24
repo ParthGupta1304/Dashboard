@@ -334,41 +334,45 @@ const Admin = () => {
       {showHistoryPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-zinc-900 p-8 rounded-xl shadow-lg w-full max-w-2xl">
-            <h2 className="text-2xl text-white mb-4">Search Leave History</h2>
-            <div className="flex gap-4 mb-4">
-              <div>
-                <label className="text-gray-300">Start Date: </label>
-                <input
-                  type="date"
-                  value={historyStart}
-                  onChange={(e) => setHistoryStart(e.target.value)}
-                  className="rounded p-2 bg-zinc-800 text-white"
-                />
+            <h2 className="text-2xl text-white mb-8">Search Leave History</h2>
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex gap-10">
+                <div>
+                  <label className="text-gray-300 ">Start Date: </label>
+                  <input
+                    type="date"
+                    value={historyStart}
+                    onChange={(e) => setHistoryStart(e.target.value)}
+                    className="rounded p-2 bg-zinc-800 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-300">End Date: </label>
+                  <input
+                    type="date"
+                    value={historyEnd}
+                    onChange={(e) => setHistoryEnd(e.target.value)}
+                    className="rounded p-2 bg-zinc-800 text-white"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-gray-300">End Date: </label>
-                <input
-                  type="date"
-                  value={historyEnd}
-                  onChange={(e) => setHistoryEnd(e.target.value)}
-                  className="rounded p-2 bg-zinc-800 text-white"
-                />
+              <div className="flex gap-10">
+                <button
+                  className=" px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  onClick={fetchLeaveHistory}
+                >
+                  Search
+                </button>
+                <button
+                  className=" px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800"
+                  onClick={() => {
+                    setShowHistoryPopup(false);
+                    setHistoryResults([]);
+                  }}
+                >
+                  Close
+                </button>
               </div>
-              <button
-                className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={fetchLeaveHistory}
-              >
-                Search
-              </button>
-              <button
-                className="ml-2 px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800"
-                onClick={() => {
-                  setShowHistoryPopup(false);
-                  setHistoryResults([]);
-                }}
-              >
-                Close
-              </button>
             </div>
             <div className="max-h-96 overflow-y-auto">
               {historyResults.length === 0 ? (
