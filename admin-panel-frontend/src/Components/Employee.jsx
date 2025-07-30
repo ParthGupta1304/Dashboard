@@ -9,19 +9,29 @@ const Employee = () => {
   const [leaveReason, setLeaveReason] = useState("");
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
+  const [error, setError] = useState(""); // <-- Add error state
   const { ID } = useParams();
 
   useEffect(() => {
     if (!ID) {
-      console.warn("No ID found. Redirect or show error.");
+      setError("No employee ID found.");
       return;
     }
     axios
       .get(`${API_ENDPOINTS.EMPLOYEE}/${ID}`)
       .then((res) => {
+        // Check if response is valid object
+        if (typeof res.data !== "object" || res.data === null || Array.isArray(res.data)) {
+          setError("Invalid employee data received.");
+          return;
+        }
         setUser(res.data);
+        setError("");
       })
-      .catch((err) => console.error("Error fetching employee:", err));
+      .catch((err) => {
+        setError("Error fetching employee data.");
+        console.error("Error fetching employee:", err);
+      });
   }, [ID]);
   const check_status = () => {
     if (Array.isArray(user.leave_history) && user.leave_history.length > 0) {
@@ -89,6 +99,15 @@ const Employee = () => {
   }, [user.leaves_granted, user.leave_end, user.asked_leave_status]);
 
   // Render the employee dashboard UI
+  if (error) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-950 via-zinc-950 to-gray-950 text-white">
+        <h1 className="text-4xl font-bold mb-4">Employee Dashboard</h1>
+        <p className="text-red-500 text-xl">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen w-full flex flex-col bg-gradient-to-br from-slate-950 via-zinc-950 to-gray-950 text-white">
       <h1 className="text-white text-6xl font-bold mb-1 ml-7 mr-7 mt-8 border-b-2 font-[FoundersGrotesk] z-50">

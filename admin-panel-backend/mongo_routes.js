@@ -99,12 +99,16 @@ app.post("/api/auth/login", async (req, res) => {
     await user.save();
     console.log("✅ User logged in:", user);
 
-    res.status(200).json({ message: "Login successful", user, role: user.role });
+    res
+      .status(200)
+      .json({ message: "Login successful", user, role: user.role });
   } catch (error) {
     console.error("❌ Error logging in:", error);
     console.error("❌ Request body:", req.body);
     if (error.stack) console.error(error.stack);
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
 
