@@ -115,7 +115,7 @@ app.post("/api/auth/login", async (req, res) => {
 app.get("/api/auth/admin", async (req, res) => {
   try {
     const employees = await userModel.find({ role: "employee" });
-    res.send(employees);
+    res.json(employees);
     console.log("📋 Employees fetched:", employees.length);
   } catch (error) {
     console.error("❌ Error fetching employees:", error);
@@ -153,7 +153,8 @@ app.get("/api/auth/employee/:ID", async (req, res) => {
         await employee.save();
       }
     }
-    res.send(employee);
+    console.log("👤 Employee fetched:", employee.Name, "ID:", ID);
+    res.json(employee);
   } catch (error) {
     console.error("❌ Error fetching employee:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -233,7 +234,7 @@ app.get("/api/auth/admin/:ID", async (req, res) => {
     const admin = await userModel.findOne({ ID: Number(ID), role: "admin" });
     if (!admin) return res.status(404).json({ message: "Admin not found" });
     console.log("✅ Admin fetched:", admin.username);
-    res.send(admin);
+    res.json(admin);
   } catch (error) {
     console.error("❌ Error fetching admin:", error);
     res.status(500).json({ message: "Internal server error" });
