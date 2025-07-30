@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS } from "../config/api";
 
 const Admin = () => {
   // State for employee list and admin name
