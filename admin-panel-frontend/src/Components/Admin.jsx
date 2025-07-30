@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/api";
 
 const Admin = () => {
   // State for employee list and admin name
@@ -21,7 +22,7 @@ const Admin = () => {
   // Fetch all employees on mount
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/auth/admin")
+      .get(API_ENDPOINTS.ADMIN)
       .then((res) => {
         setEmployees(res.data);
         console.log(res.data);
@@ -36,7 +37,7 @@ const Admin = () => {
       return;
     }
     axios
-      .get(`http://localhost:3000/api/auth/admin/${adminID}`)
+      .get(`${API_ENDPOINTS.ADMIN}/${adminID}`)
       .then((res) => {
         setAdminName(res.data.username);
         console.log("Admin data:", res.data);
@@ -47,7 +48,7 @@ const Admin = () => {
   // Remove an employee by ID
   const handleRemove = (ID) => {
     axios
-      .delete(`http://localhost:3000/api/auth/admin/${ID}`)
+      .delete(`${API_ENDPOINTS.ADMIN}/${ID}`)
       .then(() => setEmployees(employees.filter((e) => e.ID !== ID)))
       .catch((err) => alert("Error removing employee"));
   };
@@ -67,17 +68,14 @@ const Admin = () => {
   // Accept or reject leave
   const handleLeaveAction = async (ID, action) => {
     try {
-      await axios.patch(
-        `http://localhost:3000/api/auth/admin/${ID}/grant-leave`,
-        { action }
-      );
+      await axios.patch(`${API_ENDPOINTS.ADMIN}/${ID}/grant-leave`, { action });
       alert(`Leave ${action}ed successfully!`);
       setShowLeavePopup(false);
       setSelectedEmployee(null);
       // Reset admin approval status
 
       // Refresh employees list
-      const res = await axios.get("http://localhost:3000/api/auth/admin");
+      const res = await axios.get(API_ENDPOINTS.ADMIN);
       setEmployees(res.data);
     } catch (err) {
       alert("Error updating leave status");
@@ -93,13 +91,10 @@ const Admin = () => {
   const fetchLeaveHistory = async () => {
     if (!historyStart || !historyEnd) return;
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/auth/leave-history-range",
-        {
-          start: historyStart,
-          end: historyEnd,
-        }
-      );
+      const res = await axios.post(API_ENDPOINTS.LEAVE_HISTORY_RANGE, {
+        start: historyStart,
+        end: historyEnd,
+      });
       setHistoryResults(res.data.history);
       console.log("Leave history results:", res.data.history);
     } catch (err) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 const Employee = () => {
   const [user, setUser] = useState({});
@@ -16,7 +17,7 @@ const Employee = () => {
       return;
     }
     axios
-      .get(`http://localhost:3000/api/auth/employee/${ID}`)
+      .get(`${API_ENDPOINTS.EMPLOYEE}/${ID}`)
       .then((res) => {
         setUser(res.data);
       })
@@ -35,15 +36,12 @@ const Employee = () => {
 
   const handleAskLeave = async () => {
     try {
-      await axios.patch(
-        `http://localhost:3000/api/auth/employee/${ID}/ask-leave`,
-        {
-          asked_leave_reason: leaveReason,
-          leave_start: leaveStart,
-          leave_end: leaveEnd,
-          admin_approval: true, // Assuming admin approval is required
-        }
-      );
+      await axios.patch(`${API_ENDPOINTS.EMPLOYEE}/${ID}/ask-leave`, {
+        asked_leave_reason: leaveReason,
+        leave_start: leaveStart,
+        leave_end: leaveEnd,
+        admin_approval: true, // Assuming admin approval is required
+      });
       alert("Leave requested!");
       setShowModal(false);
       setUser({

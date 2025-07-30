@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/api";
 
 const Login = () => {
   const [userinfo, setUserinfo] = useState({
@@ -23,10 +24,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        userinfo
-      );
+      const response = await axios.post(API_ENDPOINTS.LOGIN, userinfo);
 
       console.log(response.data);
 

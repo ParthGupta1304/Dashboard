@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 const SignUp = () => {
   const [userdata, setUserdata] = useState({
@@ -32,14 +33,11 @@ const SignUp = () => {
     const newID = generateRandomID();
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/signup",
-        {
-          ...userdata,
-          ID: newID,
-          role,
-        }
-      );
+      const response = await axios.post(API_ENDPOINTS.SIGNUP, {
+        ...userdata,
+        ID: newID,
+        role,
+      });
       console.log(response.data);
       alert(`Account created successfully! Your ID is ${newID}`);
       if (response.status === 201) {
